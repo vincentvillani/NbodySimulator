@@ -14,11 +14,15 @@
 #include "Header/ParticlesUtility.h"
 #include "Header/Simulation.h"
 
-#define PARTICLE_NUM 20000
+
+#define BLOCK_SIZE (1024)
+#define PARTICLE_NUM (BLOCK_SIZE * 10) //MUST BE A MULTIPLE OF BLOCK SIZE
 #define FRAME_RATE (144)
 #define TIME_STEP (1.0f / FRAME_RATE)
 #define SIMULATION_SECONDS (40)
 #define MASS (5.0f)
+
+
 
 int main()
 {
@@ -36,7 +40,7 @@ int main()
 	CopyHostParticlesToDevice(&hostParticles, &deviceParticles);
 
 	//Run the simulation
-	Simulate(&hostParticles, &deviceParticles, FRAME_RATE * SIMULATION_SECONDS, TIME_STEP, MASS);
+	Simulate(&hostParticles, &deviceParticles, FRAME_RATE * SIMULATION_SECONDS, TIME_STEP, MASS, BLOCK_SIZE);
 
 
 	printf("Done...\n");

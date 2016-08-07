@@ -19,16 +19,29 @@
 #include "../Header/ParticlesUtility.h"
 #include "../Header/kernels.h"
 
-
-#define BLOCK_DIM 1024
-
-void DeviceSimulation(Host_Particles* hostParticles, Device_Particles* deviceParticles, float* d_timeDelta, float* d_mass)
+void DeviceSimulationGlobal(Host_Particles* hostParticles, Device_Particles* deviceParticles, float* d_timeDelta, float* d_mass, uint32_t blockDim)
 {
-	dim3 block(BLOCK_DIM);
-	dim3 grid( ceilf( hostParticles->h_particleNumber / (float)BLOCK_DIM) );
+	dim3 block(blockDim);
+	dim3 grid( ceilf( hostParticles->h_particleNumber / (float)blockDim) );
 	//printf("block: %u\ngrid: %u\n", block.x, grid.x);
 
 	CalculateForcesGlobal<<<grid, block>>> (deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta, d_mass);
+	//gpuErrchk( cudaPeekAtLastError() );
+	//gpuErrchk( cudaDeviceSynchronize() );
+
+	UpdatePositionsGlobal<<<grid, block>>>(deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta);
+	//gpuErrchk( cudaPeekAtLastError() );
+	//gpuErrchk( cudaDeviceSynchronize() );
+}
+
+
+void DeviceSimulationShared(Host_Particles* hostParticles, Device_Particles* deviceParticles, float* d_timeDelta, float* d_mass, uint32_t blockDim)
+{
+	dim3 block(blockDim);
+	dim3 grid( ceilf( hostParticles->h_particleNumber / (float)blockDim) );
+	//printf("block: %u\ngrid: %u\n", block.x, grid.x);
+
+	CalculateForcesShared<<<grid, block, sizeof(float) * blockDim * 3>>> (deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta, d_mass);
 	//gpuErrchk( cudaPeekAtLastError() );
 	//gpuErrchk( cudaDeviceSynchronize() );
 
@@ -62,7 +75,7 @@ void WriteHeaderInformationToOutputFile(Host_Particles* hostParticles, uint64_t 
 }
 
 
-void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta, float h_mass)
+void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta, float h_mass, uint32_t blockDim)
 {
 
 	//Open up the output file
@@ -89,6 +102,8 @@ void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, 
 
 
 
+	uint32_t frameCounter = 0;
+
 	for(uint64_t i = 0; i < h_totalNumberOfSteps; ++i)
 	{
 		//Sync with the device
@@ -102,12 +117,20 @@ void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, 
 		CopyDeviceParticlesPositionsToHost(deviceParticles, hostParticles);
 
 		//Call the two simulation kernels, one by one (async)
-		DeviceSimulation(hostParticles, deviceParticles, d_timeDelta, d_mass);
+		//DeviceSimulationGlobal(hostParticles, deviceParticles, d_timeDelta, d_mass, blockDim);
+		DeviceSimulationShared(hostParticles, deviceParticles, d_timeDelta, d_mass, blockDim);
 
 		//While the simulation is occuring, write the host data to a file
 		WriteHostDataToFile(hostParticles, i, outputFile);
 
-		printf("Frame: %llu/%llu\n", i, h_totalNumberOfSteps);
+		frameCounter += 1;
+
+		if(frameCounter == 9)
+		{
+			frameCounter = 0;
+			printf("Frame: %lu/%lu\n", i, h_totalNumberOfSteps);
+		}
+
 
 	}
 

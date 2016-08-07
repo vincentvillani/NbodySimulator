@@ -24,6 +24,8 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 
 __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, uint64_t* d_particleNum, float* d_timeDelta, float* d_mass);
+__global__ void CalculateForcesShared(float* d_positions, float* d_velocities, uint64_t* d_particleNum, float* d_timeDelta, float* d_mass);
+
 __global__ void UpdatePositionsGlobal(float* d_positions, float* d_velocities, uint64_t* d_particleNum, float* d_timeDelta);
 
 #endif /* KERNELS_H_ */
