@@ -14,10 +14,10 @@
 #include "Header/ParticlesUtility.h"
 #include "Header/Simulation.h"
 
-#define PARTICLE_NUM 50000
+#define PARTICLE_NUM 20000
 #define FRAME_RATE (144)
 #define TIME_STEP (1.0f / FRAME_RATE)
-#define SIMULATION_SECONDS (20)
+#define SIMULATION_SECONDS (40)
 #define MASS (5.0f)
 
 int main()

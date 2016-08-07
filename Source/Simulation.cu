@@ -107,6 +107,8 @@ void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, 
 		//While the simulation is occuring, write the host data to a file
 		WriteHostDataToFile(hostParticles, i, outputFile);
 
+		printf("Frame: %llu/%llu\n", i, h_totalNumberOfSteps);
+
 	}
 
 

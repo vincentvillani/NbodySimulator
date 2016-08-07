@@ -21,6 +21,7 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 
 
 	float mass = *d_mass;
+	const float softeningFactorSquared = 0.5f * 0.5f;
 
 	//if(globalIndex == 0)
 	//	printf("Time Delta: %f\nMass: %f\n", *d_timeDelta, *d_mass);
@@ -43,8 +44,8 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 	for(uint64_t i = 0; i < *d_particleNum; ++i)
 	{
 
-		if(i == globalIndex)
-			continue;
+		//if(i == globalIndex)
+		//	continue;
 
 		//Get a vector from our mass to the current mass
 		float3 vectorToCurrentMass;
@@ -59,13 +60,15 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 		//Calculate distances
 		float distanceSquared = vectorToCurrentMass.x * vectorToCurrentMass.x + vectorToCurrentMass.y * vectorToCurrentMass.y +
 				vectorToCurrentMass.z * vectorToCurrentMass.z;
-		float distance = sqrtf(distanceSquared);
+		//float distance = sqrtf(distanceSquared);
 
+		/*
 		if(fabs(distanceSquared) == 0.0f)
 		{
-			printf("ZERO!\n");
+			//printf("ZERO!\n");
 			continue;
 		}
+		*/
 
 		/*
 		if(globalIndex == 0)
@@ -77,17 +80,17 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 
 
 		//Normalise the vectorToCurrentMass
-		vectorToCurrentMass.x /= distance;
-		vectorToCurrentMass.y /= distance;
-		vectorToCurrentMass.z /= distance;
+		vectorToCurrentMass.x *= mass;
+		vectorToCurrentMass.y *= mass;
+		vectorToCurrentMass.z *= mass;
 
 		//Calculate the force between them
-		float force = (mass * mass) / distanceSquared;
+		float denominator = powf( (distanceSquared + softeningFactorSquared), 3.0f / 2.0f);
 
 		//Add the force this object applies to the force vector
-		forceVector.x += force * vectorToCurrentMass.x * *d_timeDelta;
-		forceVector.y += force * vectorToCurrentMass.y * *d_timeDelta;
-		forceVector.z += force * vectorToCurrentMass.z * *d_timeDelta;
+		forceVector.x += (vectorToCurrentMass.x / denominator) * *d_timeDelta;
+		forceVector.y += (vectorToCurrentMass.y / denominator) * *d_timeDelta;
+		forceVector.z += (vectorToCurrentMass.z / denominator) * *d_timeDelta;
 	}
 
 	//if(globalIndex == 0)
