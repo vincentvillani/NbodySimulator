@@ -13,7 +13,7 @@
 #include "ParticlesUtility.h"
 
 
-void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta);
+void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta, float h_mass);
 
 
 

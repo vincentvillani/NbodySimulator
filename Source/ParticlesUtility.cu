@@ -30,6 +30,9 @@ void SetInitialParticleStateHost(Host_Particles* hostParticles)
 		hostParticles->h_velocities[i] = veclocityDistribution(randomNumberGenerator);
 	}
 
+
+	printf("Setting initial state complete\n");
+
 }
 
 

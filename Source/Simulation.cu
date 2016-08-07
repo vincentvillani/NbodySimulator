@@ -22,29 +22,65 @@
 
 #define BLOCK_DIM 1024
 
-void DeviceSimulation(Host_Particles* hostParticles, Device_Particles* deviceParticles, float* d_timeDelta)
+void DeviceSimulation(Host_Particles* hostParticles, Device_Particles* deviceParticles, float* d_timeDelta, float* d_mass)
 {
 	dim3 block(BLOCK_DIM);
 	dim3 grid( ceilf( hostParticles->h_particleNumber / (float)BLOCK_DIM) );
 
-	CalculateForcesGlobal<<<grid, block>>> (deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta);
+	CalculateForcesGlobal<<<grid, block>>> (deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta, d_mass);
 	UpdatePositionsGlobal<<<grid, block>>>(deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta);
 }
 
 
-void WriteHostDataToFile(Host_Particles* hostParticles)
+void WriteHostDataToFile(Host_Particles* hostParticles, uint64_t frameNumber, FILE* outputFile)
 {
+
+	fwrite(&frameNumber, sizeof(uint64_t), 1, outputFile);
+	fwrite(hostParticles->h_positions, sizeof(float) * hostParticles->h_arrayLength, 1, outputFile);
 
 }
 
 
-void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta)
+void WriteHeaderInformationToOutputFile(Host_Particles* hostParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta, float mass, FILE* outputFile)
+{
+	uint64_t headerByteSize = sizeof(uint64_t) + sizeof(uint64_t) + sizeof(uint64_t) + sizeof(float) + sizeof(float);
+	uint64_t expectedFileByteSize = headerByteSize + (h_totalNumberOfSteps * hostParticles->h_particleNumber * 3 * sizeof(float)) +
+			h_totalNumberOfSteps * sizeof(uint64_t);
+
+	fwrite(&expectedFileByteSize, sizeof(uint64_t),1, outputFile);
+	fwrite(&h_totalNumberOfSteps, sizeof(uint64_t), 1, outputFile);
+	fwrite(&(hostParticles->h_particleNumber), sizeof(uint64_t), 1, outputFile);
+	fwrite(&h_timeDelta, sizeof(float), 1, outputFile);
+	fwrite(&mass, sizeof(float), 1, outputFile);
+
+}
+
+
+void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, uint64_t h_totalNumberOfSteps, float h_timeDelta, float h_mass)
 {
 
-	//Allocate memory for the time delta and copy it to the device
+	//Open up the output file
+	FILE* outputFile = fopen("OutputFile.sim", "wb");
+
+	if(outputFile == NULL)
+	{
+		fprintf(stderr, "Simulate: Unable to open output file\n");
+		exit(1);
+	}
+
+	//Write the file header
+	WriteHeaderInformationToOutputFile(hostParticles, h_totalNumberOfSteps, h_timeDelta, h_mass, outputFile);
+
+
+	//Allocate memory for the time delta and mass and copy it to the device
 	float* d_timeDelta = NULL;
 	cudaMalloc(&d_timeDelta, sizeof(float));
 	cudaMemcpy(d_timeDelta, &h_timeDelta, sizeof(float), cudaMemcpyHostToDevice);
+
+	float* d_mass = NULL;
+	cudaMalloc(&d_mass, sizeof(float));
+	cudaMemcpy(d_mass, &h_mass, sizeof(float), cudaMemcpyHostToDevice);
+
 
 
 	for(uint64_t i = 0; i < h_totalNumberOfSteps; ++i)
@@ -60,11 +96,16 @@ void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, 
 		CopyDeviceParticlesPositionsToHost(deviceParticles, hostParticles);
 
 		//Call the two simulation kernels, one by one (async)
-		DeviceSimulation(hostParticles, deviceParticles, d_timeDelta);
+		DeviceSimulation(hostParticles, deviceParticles, d_timeDelta, d_mass);
 
 		//While the simulation is occuring, write the host data to a file
+		WriteHostDataToFile(hostParticles, i, outputFile);
 
 	}
+
+
+	fclose(outputFile);
+
 }
 
 

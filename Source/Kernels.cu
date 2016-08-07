@@ -9,14 +9,14 @@
 #include "../Header/kernels.h"
 
 
-__global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, uint64_t* particleNum, float* timeDelta)
+__global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, uint64_t* d_particleNum, float* d_timeDelta, float* d_mass)
 {
 	uint64_t globalIndex = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if(globalIndex >= *particleNum)
+	if(globalIndex >= *d_particleNum)
 		return;
 
-	const float mass = 10.0f;
+	float mass = *d_mass;
 
 	//Get this threads masses's position
 	float3 ourMassPosition;
@@ -29,7 +29,7 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 	forceVector.y = 0;
 	forceVector.z = 0;
 
-	for(uint64_t i = 0; i < *particleNum; ++i)
+	for(uint64_t i = 0; i < *d_particleNum; ++i)
 	{
 
 		//Get a vector from our mass to the current mass
@@ -52,9 +52,9 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 		float force = (mass * mass) / distanceSquared;
 
 		//Add the force this object applies to the force vector
-		forceVector.x += force * vectorToCurrentMass.x * *timeDelta;
-		forceVector.y += force * vectorToCurrentMass.y * *timeDelta;
-		forceVector.z += force * vectorToCurrentMass.z * *timeDelta;
+		forceVector.x += force * vectorToCurrentMass.x * *d_timeDelta;
+		forceVector.y += force * vectorToCurrentMass.y * *d_timeDelta;
+		forceVector.z += force * vectorToCurrentMass.z * *d_timeDelta;
 	}
 
 	//Add the total force contribution from all objects this timestep to this objects velocity vector

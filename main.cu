@@ -15,6 +15,9 @@
 #include "Header/Simulation.h"
 
 #define PARTICLE_NUM 1000
+#define TIME_STEP (1.0f / 60.0f)
+#define NUMBER_FRAMES (180)
+#define MASS (10.0f)
 
 int main()
 {
@@ -32,7 +35,7 @@ int main()
 	CopyHostParticlesToDevice(&hostParticles, &deviceParticles);
 
 	//Run the simulation
-	Simulate(&hostParticles, &deviceParticles, 180, 1.0f/60.0f);
+	Simulate(&hostParticles, &deviceParticles, NUMBER_FRAMES, TIME_STEP, MASS);
 
 
 	printf("Done...\n");
