@@ -56,7 +56,7 @@ Device_Particles::Device_Particles(uint64_t particleNum)
 
 	//Copy the particle number and length values over
 	uint64_t h_arrayLength = particleNum * 3;
-	cudaMemcpy(d_particleNumber, &h_arrayLength, sizeof(uint64_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_particleNumber, &particleNum, sizeof(uint64_t), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_arrayLength, &h_arrayLength, sizeof(uint64_t), cudaMemcpyHostToDevice);
 
 }

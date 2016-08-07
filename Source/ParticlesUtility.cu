@@ -11,16 +11,16 @@
 #include <random>
 
 
-#define POSITION_MIN -10.0f
-#define POSITION_MAX 10.0f
+#define POSITION_MIN -150.0f
+#define POSITION_MAX 150.0f
 
-#define VELOCITY_MIN -1.0f
-#define VELOCITY_MAX 1.0f
+#define VELOCITY_MIN -0.01f
+#define VELOCITY_MAX 0.01f
 
 void SetInitialParticleStateHost(Host_Particles* hostParticles)
 {
 	std::default_random_engine randomNumberGenerator;
-	std::uniform_real_distribution<float> positionDistribution(POSITION_MIN, POSITION_MAX);
+	std::normal_distribution<float> positionDistribution(POSITION_MIN, POSITION_MAX);
 	std::uniform_real_distribution<float> veclocityDistribution(VELOCITY_MIN, VELOCITY_MAX);
 
 	//Set initial positions and velocities
@@ -43,8 +43,8 @@ void CopyHostParticlesToDevice(Host_Particles* hostParticles, Device_Particles* 
 
 	size_t arrayByteLength = sizeof(float) * hostParticles->h_particleNumber * 3;
 
-	cudaMemcpy( &(deviceParticles->d_positions), &(hostParticles->h_positions), arrayByteLength, cudaMemcpyHostToDevice);
-	cudaMemcpy( &(deviceParticles->d_velocities), &(hostParticles->h_velocities), arrayByteLength, cudaMemcpyHostToDevice);
+	cudaMemcpy( deviceParticles->d_positions, hostParticles->h_positions, arrayByteLength, cudaMemcpyHostToDevice);
+	cudaMemcpy( deviceParticles->d_velocities, hostParticles->h_velocities, arrayByteLength, cudaMemcpyHostToDevice);
 }
 
 
@@ -55,6 +55,6 @@ void CopyDeviceParticlesPositionsToHost(Device_Particles* deviceParticles, Host_
 
 	size_t arrayByteLength = sizeof(float) * hostParticles->h_particleNumber * 3;
 
-	cudaMemcpy( &(hostParticles->h_positions), &(deviceParticles->d_positions), arrayByteLength, cudaMemcpyDeviceToHost);
+	cudaMemcpy( hostParticles->h_positions, deviceParticles->d_positions, arrayByteLength, cudaMemcpyDeviceToHost);
 }
 

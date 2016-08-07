@@ -26,9 +26,15 @@ void DeviceSimulation(Host_Particles* hostParticles, Device_Particles* devicePar
 {
 	dim3 block(BLOCK_DIM);
 	dim3 grid( ceilf( hostParticles->h_particleNumber / (float)BLOCK_DIM) );
+	//printf("block: %u\ngrid: %u\n", block.x, grid.x);
 
 	CalculateForcesGlobal<<<grid, block>>> (deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta, d_mass);
+	//gpuErrchk( cudaPeekAtLastError() );
+	//gpuErrchk( cudaDeviceSynchronize() );
+
 	UpdatePositionsGlobal<<<grid, block>>>(deviceParticles->d_positions, deviceParticles->d_velocities, deviceParticles->d_particleNumber, d_timeDelta);
+	//gpuErrchk( cudaPeekAtLastError() );
+	//gpuErrchk( cudaDeviceSynchronize() );
 }
 
 
