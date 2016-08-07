@@ -141,9 +141,9 @@ __global__ void CalculateForcesShared(float* d_positions, float* d_velocities, u
 	{
 
 		//Each thread in the block should load one x,y,z position
-		sharedMemory[threadIdx.x * 3] = d_positions [i * 3 + threadIdx.x * 3];
-		sharedMemory[threadIdx.x * 3 + 1] = d_positions [i * 3 + threadIdx.x * 3 + 1];
-		sharedMemory[threadIdx.x * 3  + 2] = d_positions [i * 3 + threadIdx.x * 3 + 2];
+		sharedMemory[threadIdx.x * 3] = d_positions [(i + threadIdx.x) * 3];
+		sharedMemory[threadIdx.x * 3 + 1] = d_positions [(i + threadIdx.x) * 3 + 1];
+		sharedMemory[threadIdx.x * 3  + 2] = d_positions [(i + threadIdx.x) * 3 + 2];
 
 		//Wait till all threads in this block have written to shared memory
 		__syncthreads();
@@ -164,7 +164,7 @@ __global__ void CalculateForcesShared(float* d_positions, float* d_velocities, u
 					vectorToCurrentMass.z * vectorToCurrentMass.z;
 
 
-			//Normalise the vectorToCurrentMass
+			//Scale the vector by the mass
 			vectorToCurrentMass.x *= mass;
 			vectorToCurrentMass.y *= mass;
 			vectorToCurrentMass.z *= mass;
@@ -198,14 +198,6 @@ __global__ void UpdatePositionsGlobal(float* d_positions, float* d_velocities, u
 
 	if(globalIndex >= *particleNum)
 		return;
-
-	/*
-	if(globalIndex == 0)
-	{
-		printf("Time Delta: %f\n", *d_timeDelta);
-		printf("%f, %f, %f\n\n", d_velocities[globalIndex * 3], d_velocities[globalIndex * 3 + 1], d_velocities[globalIndex * 3 + 2]);
-	}
-	*/
 
 	d_positions[globalIndex * 3] += d_velocities[globalIndex * 3] * *d_timeDelta;
 	d_positions[globalIndex * 3 + 1] += d_velocities[globalIndex * 3 + 1] * *d_timeDelta;

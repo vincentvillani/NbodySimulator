@@ -125,7 +125,7 @@ void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, 
 
 		frameCounter += 1;
 
-		if(frameCounter == 9)
+		if(frameCounter == 10)
 		{
 			frameCounter = 0;
 			printf("Frame: %lu/%lu\n", i, h_totalNumberOfSteps);
