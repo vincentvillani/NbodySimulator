@@ -16,15 +16,9 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 	if(globalIndex >= *d_particleNum)
 		return;
 
-	//if(globalIndex == 0)
-	//	printf("particleCount: %llu\n", *d_particleNum);
-
 
 	float mass = *d_mass;
 	const float softeningFactorSquared = 0.5f * 0.5f;
-
-	//if(globalIndex == 0)
-	//	printf("Time Delta: %f\nMass: %f\n", *d_timeDelta, *d_mass);
 
 
 	//Get this threads masses's position
@@ -33,8 +27,6 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 	ourMassPosition.y = d_positions[ globalIndex * 3 + 1 ];
 	ourMassPosition.z = d_positions[ globalIndex * 3 + 2 ];
 
-	//if(globalIndex == 0)
-	//	printf("%f, %f, %f\n", ourMassPosition.x, ourMassPosition.y, ourMassPosition.z);
 
 	float3 forceVector;
 	forceVector.x = 0;
@@ -44,39 +36,16 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 	for(uint64_t i = 0; i < *d_particleNum; ++i)
 	{
 
-		//if(i == globalIndex)
-		//	continue;
-
 		//Get a vector from our mass to the current mass
 		float3 vectorToCurrentMass;
 		vectorToCurrentMass.x = d_positions[i * 3 ] - ourMassPosition.x;
 		vectorToCurrentMass.y = d_positions[i * 3 + 1 ] - ourMassPosition.y;
 		vectorToCurrentMass.z = d_positions[i * 3 + 2 ] - ourMassPosition.z;
 
-		//if(globalIndex == 0 && i == 1)
-			//printf("%f, %f, %f\n", vectorToCurrentMass.x, vectorToCurrentMass.y, vectorToCurrentMass.z);
-
 
 		//Calculate distances
 		float distanceSquared = vectorToCurrentMass.x * vectorToCurrentMass.x + vectorToCurrentMass.y * vectorToCurrentMass.y +
 				vectorToCurrentMass.z * vectorToCurrentMass.z;
-		//float distance = sqrtf(distanceSquared);
-
-		/*
-		if(fabs(distanceSquared) == 0.0f)
-		{
-			//printf("ZERO!\n");
-			continue;
-		}
-		*/
-
-		/*
-		if(globalIndex == 0)
-		{
-			printf("d2: %f\n", distanceSquared);
-			printf("distance: %f\n", distance);
-		}
-		*/
 
 
 		//Normalise the vectorToCurrentMass
@@ -93,11 +62,6 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 		forceVector.z += (vectorToCurrentMass.z / denominator) * *d_timeDelta;
 	}
 
-	//if(globalIndex == 0)
-	//	printf("%f, %f, %f\n", forceVector.x, forceVector.y, forceVector.z);
-
-	//if(globalIndex == 0)
-	//	printf("%f, %f, %f\n", d_velocities[globalIndex * 3], d_velocities[globalIndex * 3 + 1], d_velocities[globalIndex * 3 + 2]);
 
 	//Add the total force contribution from all objects this timestep to this objects velocity vector
 	d_velocities[globalIndex * 3] += forceVector.x;
