@@ -18,7 +18,7 @@ __global__ void CalculateForcesGlobal(float* d_positions, float* d_velocities, u
 
 
 	float mass = *d_mass;
-	const float softeningFactorSquared = 0.5f * 0.5f;
+	const float softeningFactorSquared = 0.25f * 0.25f;
 
 
 	//Get this threads masses's position

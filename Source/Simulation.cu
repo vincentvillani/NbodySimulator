@@ -117,20 +117,23 @@ void Simulate(Host_Particles* hostParticles, Device_Particles* deviceParticles, 
 		CopyDeviceParticlesPositionsToHost(deviceParticles, hostParticles);
 
 		//Call the two simulation kernels, one by one (async)
-		//DeviceSimulationGlobal(hostParticles, deviceParticles, d_timeDelta, d_mass, blockDim);
-		DeviceSimulationShared(hostParticles, deviceParticles, d_timeDelta, d_mass, blockDim);
+		DeviceSimulationGlobal(hostParticles, deviceParticles, d_timeDelta, d_mass, blockDim);
+		//DeviceSimulationShared(hostParticles, deviceParticles, d_timeDelta, d_mass, blockDim);
 
 		//While the simulation is occuring, write the host data to a file
 		WriteHostDataToFile(hostParticles, i, outputFile);
 
+		printf("Frame: %lu\n%lu\n", i, h_totalNumberOfSteps);
+
+		/*
 		frameCounter += 1;
 
-		if(frameCounter == 10)
+		if(frameCounter == 11)
 		{
 			frameCounter = 0;
 			printf("Frame: %lu/%lu\n", i, h_totalNumberOfSteps);
 		}
-
+		*/
 
 	}
 

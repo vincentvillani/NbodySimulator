@@ -11,16 +11,22 @@
 #include <random>
 
 
-#define POSITION_MIN -150.0f
-#define POSITION_MAX 150.0f
+#define POSITION_MIN -500.0f
+#define POSITION_MAX 500.0f
 
-#define VELOCITY_MIN -0.01f
-#define VELOCITY_MAX 0.01f
+#define MEAN 0.0f
+#define STD_DEV_POS 100.0f
+#define STD_DEV_VELOCITY 10.0f
+
+#define VELOCITY_MIN -20.0f
+#define VELOCITY_MAX 20.0f
 
 void SetInitialParticleStateHost(Host_Particles* hostParticles)
 {
 	std::default_random_engine randomNumberGenerator;
-	std::normal_distribution<float> positionDistribution(POSITION_MIN, POSITION_MAX);
+	//std::normal_distribution<float> positionDistribution(MEAN, STD_DEV_POS);
+	//std::normal_distribution<float> veclocityDistribution(MEAN, STD_DEV_VELOCITY);
+	std::uniform_real_distribution<float> positionDistribution(POSITION_MIN, POSITION_MAX);
 	std::uniform_real_distribution<float> veclocityDistribution(VELOCITY_MIN, VELOCITY_MAX);
 
 	//Set initial positions and velocities
@@ -33,6 +39,61 @@ void SetInitialParticleStateHost(Host_Particles* hostParticles)
 
 	printf("Setting initial state complete\n");
 
+}
+
+
+
+void SetInitalParticlesStateHostNormalDistributionClusters(Host_Particles* hostParticles)
+{
+
+	std::default_random_engine randomNumberGenerator;
+
+	std::uniform_real_distribution<float> positionMeanDistribution(POSITION_MIN, POSITION_MAX);
+	std::uniform_real_distribution<float> stdDeviationDistribution(10, STD_DEV_POS);
+	std::uniform_real_distribution<float> veclocityDistribution(VELOCITY_MIN, VELOCITY_MAX);
+
+	//Number of clusters to generate (MUST BE DIVISIABLE BY BLOCK SIZE) (power of two)
+	const uint32_t numberOfClusters = 32;
+	const uint32_t clusterParticleCount = hostParticles->h_particleNumber / numberOfClusters;
+
+	//For each cluster,
+	for (uint32_t i = 0; i < numberOfClusters; ++i)
+	{
+		float currentMin = positionMeanDistribution(randomNumberGenerator);
+		float currentMax = stdDeviationDistribution(randomNumberGenerator);
+
+		//If min is actually smaller than max
+		if (currentMin <= currentMax)
+		{
+			std::uniform_real_distribution<float> positionDistribution(currentMin, currentMax);
+
+			//Generate inital values for this cluster
+			for (uint32_t j = 0; j < clusterParticleCount * 3; ++j)
+			{
+				uint32_t index = (i * clusterParticleCount * 3) + j;
+				hostParticles->h_positions[index] = positionDistribution(randomNumberGenerator);
+				hostParticles->h_velocities[index] = veclocityDistribution(randomNumberGenerator);
+			}
+		}
+		else //Min is bigger than max
+		{
+			std::uniform_real_distribution<float> positionDistribution(currentMax, currentMin);
+
+			//Generate inital values for this cluster
+			for (uint32_t j = 0; j < clusterParticleCount * 3; ++j)
+			{
+				uint32_t index = (i * clusterParticleCount * 3) + j;
+				hostParticles->h_positions[index] = positionDistribution(randomNumberGenerator);
+				hostParticles->h_velocities[index] = veclocityDistribution(randomNumberGenerator);
+			}
+		}
+
+
+
+		//printf("i: %u\n", i);
+	}
+
+	printf("Setting initial state complete\n");
 }
 
 
