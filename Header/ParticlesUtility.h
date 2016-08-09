@@ -12,6 +12,7 @@
 #include "Device_Particles.h"
 
 void SetInitialParticleStateHost(Host_Particles* hostParticles);
+void SetInitialParticleStateUniformClustersHost(Host_Particles* hostParticles);
 void SetInitalParticlesStateHostNormalDistributionClusters(Host_Particles* hostParticles);
 
 void CopyHostParticlesToDevice(Host_Particles* hostParticles, Device_Particles* deviceParticles);

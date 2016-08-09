@@ -15,12 +15,12 @@
 #include "Header/Simulation.h"
 
 
-#define BLOCK_SIZE (256) //1024 MAX
-#define PARTICLE_NUM (BLOCK_SIZE * 100 * 4) //MUST BE A MULTIPLE OF BLOCK SIZE
+#define BLOCK_SIZE (1024) //1024 MAX
+#define PARTICLE_NUM (BLOCK_SIZE * 10) //MUST BE A MULTIPLE OF BLOCK SIZE
 #define FRAME_RATE (180)
 #define TIME_STEP (1.0f / FRAME_RATE)
-#define SIMULATION_SECONDS (15)
-#define MASS (10.0f)
+#define SIMULATION_SECONDS (10)
+#define MASS (20.0f)
 
 
 
@@ -34,8 +34,9 @@ int main()
 	Device_Particles deviceParticles(PARTICLE_NUM);
 
 	//Set the intial state on the host
-	SetInitialParticleStateHost(&hostParticles);
-	//SetInitalParticlesStateHostNormalDistributionClusters(&hostParticles);
+	//SetInitialParticleStateHost(&hostParticles);
+	//SetInitialParticleStateUniformClustersHost(&hostParticles);
+	SetInitalParticlesStateHostNormalDistributionClusters(&hostParticles);
 
 	//Copy the initial state over to the device
 	CopyHostParticlesToDevice(&hostParticles, &deviceParticles);

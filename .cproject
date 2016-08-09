@@ -53,10 +53,10 @@
 			</storageModule>
 			<storageModule moduleId="com.nvidia.cuda.ide.build.project.ICudaProjectConfiguration">
 				<executable devicelink="false">
-					<sass major="5" minor="0"/>
-					<ptx major="5" minor="0"/>
+					<ptx major="3" minor="0"/>
+					<sass major="3" minor="0"/>
 				</executable>
-				<editor-arch major="5" minor="0"/>
+				<editor-arch major="3" minor="0"/>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
@@ -87,7 +87,7 @@
 								<option defaultValue="nvcc.compiler.optimization.level.most" id="nvcc.compiler.optimization.level.651369223" name="Optimization Level" superClass="nvcc.compiler.optimization.level" valueType="enumerated"/>
 								<option id="nvcc.compiler.pic.30738962" name="Position Independent Code (-fPIC)" superClass="nvcc.compiler.pic"/>
 								<option id="com.nvidia.cuda.ide.build.option1.1294016755" name="Compiler Path (-ccbin)" superClass="com.nvidia.cuda.ide.build.option1" value="/usr/bin/g++-4.9" valueType="string"/>
-								<option id="nvcc.compiler.cpp11option.265654920" superClass="nvcc.compiler.cpp11option" value="true" valueType="boolean"/>
+								<option id="nvcc.compiler.cpp11option.265654920" name="Enable C++11 support (-std=c++11)" superClass="nvcc.compiler.cpp11option" value="true" valueType="boolean"/>
 								<inputType id="nvcc.compiler.input.cu.1598523658" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.1922646091" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.1787855861" superClass="nvcc.compiler.input.c"/>
@@ -112,10 +112,10 @@
 			</storageModule>
 			<storageModule moduleId="com.nvidia.cuda.ide.build.project.ICudaProjectConfiguration">
 				<executable devicelink="false">
-					<sass major="5" minor="0"/>
-					<ptx major="5" minor="0"/>
+					<ptx major="3" minor="0"/>
+					<sass major="3" minor="0"/>
 				</executable>
-				<editor-arch major="5" minor="0"/>
+				<editor-arch major="3" minor="0"/>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
