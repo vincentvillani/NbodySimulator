@@ -9,6 +9,7 @@
 #include "../Header/ParticlesUtility.h"
 
 #include <random>
+#include <time.h>
 
 
 #define POSITION_MIN -100.0f
@@ -99,10 +100,11 @@ void SetInitialParticleStateUniformClustersHost(Host_Particles* hostParticles)
 void SetInitalParticlesStateHostNormalDistributionClusters(Host_Particles* hostParticles)
 {
 
-	std::default_random_engine randomNumberGenerator;
+	std::default_random_engine randomNumberGenerator(time(0));
 
-	std::normal_distribution<float> positionMeanDistribution(0, 50);
-	std::uniform_real_distribution<float> stdDeviationDistribution(10, 50);
+	//std::normal_distribution<float> positionMeanDistribution(0, 100);
+	std::uniform_real_distribution<float> positionMeanDistribution(-100, 100);
+	std::uniform_real_distribution<float> stdDeviationDistribution(10, 100);
 	//std::normal_distribution<float> veclocityDistribution(VELOCITY_MIN, VELOCITY_MAX);
 
 	//Number of clusters to generate (MUST BE DIVISIABLE BY BLOCK SIZE) (power of two)
